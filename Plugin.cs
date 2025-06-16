@@ -182,7 +182,7 @@ namespace PizzaDelivery
                 RaycastHit rayHit;
                 if (Physics.Raycast(new Vector3(UnityEngine.Random.Range(MIN_X, MAX_X), MAX_HEIGHT, UnityEngine.Random.Range(MIN_Z, MAX_Z)), Vector3.down, out rayHit, 40))
                 {
-                    if (Vector3.Dot(rayHit.normal, Vector3.up) > 0.5f)
+                    if (Vector3.Dot(rayHit.normal, Vector3.up) > 0.5f && rayHit.point.y > -1.8f)
                     {
                         clientHouse.transform.position = rayHit.point;
                         return;
