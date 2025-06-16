@@ -26,8 +26,8 @@ namespace PizzaDelivery
         ConfigEntry<int> highScoreSave;
 
 
-        Vector3 min = new Vector3(-83f, -1.8f, -31f);
-        Vector3 max = new Vector3(-35f, 28f, 28f);
+        Vector3 min = new Vector3(-83f, -1.8f, -81f);
+        Vector3 max = new Vector3(-35f, 28f, -31f);
 
         GameObject ovenPrefab = null;
         GameObject ovenProps = null;
@@ -102,6 +102,7 @@ namespace PizzaDelivery
                 }
                 if (holdState == GameState.LeftMoney || holdState == GameState.RightMoney)
                 {
+                    HoldingMoney(holdState == GameState.RightMoney);
                     money.transform.position = holdState == GameState.RightMoney ? GorillaTagger.Instance.rightHandTransform.position : GorillaTagger.Instance.leftHandTransform.position;
                     money.transform.rotation = holdState == GameState.RightMoney ? GorillaTagger.Instance.rightHandTransform.rotation : GorillaTagger.Instance.leftHandTransform.rotation;
                 }
@@ -152,7 +153,7 @@ namespace PizzaDelivery
             {
                 holdState = hand ? GameState.RightMoney : GameState.LeftMoney;
 
-                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
+                GorillaTagger.Instance.StartVibration(!hand, 0.5f, 0.1f);
                 pickUp.Play();
             }
 
@@ -166,7 +167,7 @@ namespace PizzaDelivery
                 holdState = GameState.Nothing;
                 deliveriesMade++;
                 text.text = deliveriesMade.ToString();
-                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
+                GorillaTagger.Instance.StartVibration(!hand, 0.5f, 0.1f);
                 moneyCollect.Play();
             }
             pizza.transform.position = pizzaSpawnpoint.transform.position;
