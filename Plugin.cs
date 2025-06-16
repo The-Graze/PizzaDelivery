@@ -13,17 +13,21 @@ namespace PizzaDelivery
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
+        enum GameState
+        {
+            Nothing, 
+            LeftPizza,
+            RightPizza,
+            LeftMoney,
+            RightMoney
+        }
+
         ConfigFile config;
         ConfigEntry<int> highScoreSave;
 
 
-        const float MIN_X = -35f;
-        const float MIN_Z = -31f;
-
-        const float MAX_X = -83f;
-        const float MAX_Z = -81f; // Ignore the fact that the max is greater than the min
-
-        const float MAX_HEIGHT = 28;
+        Vector3 min = new Vector3(-83f, -1.8f, -31f);
+        Vector3 max = new Vector3(-35f, 28f, 28f);
 
         GameObject ovenPrefab = null;
         GameObject ovenProps = null;
@@ -44,7 +48,7 @@ namespace PizzaDelivery
 
         int deliveriesMade = 0;
 
-        int holdState = 0; // 0 = holding nothing, 1 = holding pizza in left hand, 2 = holding pizza in right hand, 3 = holding money in left hand, 4 = holding money in right hand                    disgusting
+        GameState holdState = GameState.Nothing;
 
         bool pizzaTime = false;
         bool inRound = false;
@@ -71,7 +75,7 @@ namespace PizzaDelivery
                     if (!music.isPlaying)
                     {
                         inRound = false;
-                        holdState = 0;
+                        holdState = GameState.Nothing;
                         pizza.transform.position = pizzaSpawnpoint.transform.position;
                         clientHouse.transform.position = new Vector3(0, -1000, 0);
                         GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
@@ -86,103 +90,98 @@ namespace PizzaDelivery
                     }
                 }
 
-                if (holdState == 0) // noble degrees of nesting
+                if (holdState == GameState.Nothing) // noble degrees of nesting
                 {
-                    if (Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, pizzaPoint.transform.position) < 0.23f) // Magic numbers are the best type
-                    {
-                        holdState = 1;
-                        DropNewClient();
-                        pickUp.Play();
-
-                        GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
-
-                        if (!inRound)
-                        {
-                            deliveriesMade = 0;
-                            inRound = true;
-                            music.Play();
-                        }
-                    }
-                    else if (Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, pizzaPoint.transform.position) < 0.23f)
-                    {
-                        holdState = 2;
-                        DropNewClient();
-                        pickUp.Play();
-
-                        GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
-
-                        if (!inRound)
-                        {
-                            deliveriesMade = 0;
-                            inRound = true;
-                            music.Play();
-                        }
-                    }
+                    HoldingNothing();
                 }
-                else if (holdState == 1)
+                if (holdState == GameState.LeftPizza || holdState == GameState.RightPizza)
                 {
-                    if (Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, clientHouse.transform.position) < 0.5f)
-                    {
-                        holdState = 3;
-
-                        GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
-                        pickUp.Play();
-                    }
+                    HoldingPizza(holdState == GameState.RightPizza);
+                    pizza.transform.position = holdState == GameState.RightPizza ? GorillaTagger.Instance.rightHandTransform.position : GorillaTagger.Instance.leftHandTransform.position;
+                    pizza.transform.rotation = holdState == GameState.RightPizza ? GorillaTagger.Instance.rightHandTransform.rotation :GorillaTagger.Instance.leftHandTransform.rotation;
                 }
-                else if (holdState == 2)
+                if (holdState == GameState.LeftMoney || holdState == GameState.RightMoney)
                 {
-                    if (Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, clientHouse.transform.position) < 0.5f)
-                    {
-                        holdState = 4;
-                        GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
-                        pickUp.Play();
-                    }
+                    money.transform.position = holdState == GameState.RightMoney ? GorillaTagger.Instance.rightHandTransform.position : GorillaTagger.Instance.leftHandTransform.position;
+                    money.transform.rotation = holdState == GameState.RightMoney ? GorillaTagger.Instance.rightHandTransform.rotation : GorillaTagger.Instance.leftHandTransform.rotation;
                 }
-                else if (holdState == 3)
-                {
-                    if (Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, ovenProps.transform.position) < 4f)
-                    {
-                        holdState = 0;
-                        deliveriesMade++;
-                        text.text = deliveriesMade.ToString();
-                        GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
-                        moneyCollect.Play();
-                    }
-                }
-                else if (holdState == 4)
-                {
-                    if (Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, ovenProps.transform.position) < 4f)
-                    {
-                        holdState = 0;
-                        deliveriesMade++;
-                        text.text = deliveriesMade.ToString();
-                        GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
-                        moneyCollect.Play();
-                    }
-                }
-
-                // Following lines of code are too beautiful for you to comprehend
-                pizza.transform.position = pizzaSpawnpoint.transform.position;
-                pizza.transform.rotation = pizzaSpawnpoint.transform.rotation;
-
-                money.transform.position = new Vector3(0, -500, 0);
-                if (holdState == 0) { pizza.transform.position = pizzaSpawnpoint.transform.position; pizza.transform.rotation = pizzaSpawnpoint.transform.rotation; }
-                if (holdState == 1) { pizza.transform.position = GorillaTagger.Instance.leftHandTransform.position; pizza.transform.rotation = GorillaTagger.Instance.leftHandTransform.rotation; }
-                if (holdState == 2) { pizza.transform.position = GorillaTagger.Instance.rightHandTransform.position; pizza.transform.rotation = GorillaTagger.Instance.rightHandTransform.rotation; }
-                if (holdState == 3) { money.transform.position = GorillaTagger.Instance.leftHandTransform.position; money.transform.rotation = GorillaTagger.Instance.leftHandTransform.rotation; }
-                if (holdState == 4) { money.transform.position = GorillaTagger.Instance.rightHandTransform.position; money.transform.rotation = GorillaTagger.Instance.rightHandTransform.rotation; }
             }
+        }
+
+        void HoldingNothing()
+        {
+            if (Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, pizzaPoint.transform.position) < 0.23f) // Magic numbers are the best type
+            {
+                holdState = GameState.LeftPizza;
+                DropNewClient();
+                pickUp.Play();
+
+                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
+
+                if (!inRound)
+                {
+                    deliveriesMade = 0;
+                    inRound = true;
+                    music.Play();
+                }
+            }
+            else if (Vector3.Distance(GorillaTagger.Instance.rightHandTransform.position, pizzaPoint.transform.position) < 0.23f)
+            {
+                holdState = GameState.RightPizza;
+                DropNewClient();
+                pickUp.Play();
+
+                GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
+
+                if (!inRound)
+                {
+                    deliveriesMade = 0;
+                    inRound = true;
+                    music.Play();
+                }
+            }
+
+            pizza.transform.position = pizzaSpawnpoint.transform.position; 
+            pizza.transform.rotation = pizzaSpawnpoint.transform.rotation;
+            money.transform.position = new Vector3(0, -500, 0);
+        }
+
+        void HoldingPizza(bool hand) // false left, true right
+        {
+            if (Vector3.Distance(pizza.transform.position, clientHouse.transform.position) < 0.5f)
+            {
+                holdState = hand ? GameState.RightMoney : GameState.LeftMoney;
+
+                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
+                pickUp.Play();
+            }
+
+            money.transform.position = new Vector3(0, -500, 0);
+        }
+        void HoldingMoney(bool hand) // false left, true right
+        {
+            Vector3 handPos = hand ? GorillaTagger.Instance.rightHandTransform.position : GorillaTagger.Instance.leftHandTransform.position;
+            if (Vector3.Distance(handPos, ovenProps.transform.position) < 4f)
+            {
+                holdState = GameState.Nothing;
+                deliveriesMade++;
+                text.text = deliveriesMade.ToString();
+                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
+                moneyCollect.Play();
+            }
+            pizza.transform.position = pizzaSpawnpoint.transform.position;
+            pizza.transform.rotation = pizzaSpawnpoint.transform.rotation;
         }
 
         void DropNewClient()
         {
             Debug.Log("ok");
-            while (true) // Nothing could go wrong here
+            for (int i = 0; i < 50000; i++) // Nothing could go wrong here
             {
                 RaycastHit rayHit;
-                if (Physics.Raycast(new Vector3(UnityEngine.Random.Range(MIN_X, MAX_X), MAX_HEIGHT, UnityEngine.Random.Range(MIN_Z, MAX_Z)), Vector3.down, out rayHit, 40))
+                if (Physics.Raycast(new Vector3(UnityEngine.Random.Range(min.x, max.x), max.y, UnityEngine.Random.Range(min.z, max.z)), Vector3.down, out rayHit, 40))
                 {
-                    if (Vector3.Dot(rayHit.normal, Vector3.up) > 0.5f && rayHit.point.y > -1.8f)
+                    if (Vector3.Dot(rayHit.normal, Vector3.up) > 0.5f && rayHit.point.y > min.y)
                     {
                         clientHouse.transform.position = rayHit.point;
                         return;
