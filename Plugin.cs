@@ -53,8 +53,6 @@ namespace PizzaDelivery
         bool pizzaTime = false;
         bool inRound = false;
 
-        bool inRoom;
-
         void Awake()
         {
             string configPath = Path.Combine(Paths.ConfigPath, "pizza_delivery.cfg");
@@ -200,29 +198,27 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
             }
 
             ovenProps = Instantiate(ovenPrefab, new Vector3(-27.99f, 2.19f, -47.52f), Quaternion.identity);
-            ovenProps.AddComponent<GorillaSurfaceOverride>();
 
-            clientHouse = GameObject.Find("_House");
+            clientHouse = GameObject.Find("PizzaDelivery_House");
 
-            pizza = GameObject.Find("_Pizza");
+            pizza = GameObject.Find("PizzaDelivery_Pizza");
             pizzaPoint = pizza.transform.GetChild(0).gameObject;
+            pizzaSpawnpoint = GameObject.Find("PizzaDelivery_Pizza Spawn Point");
 
-            pizzaSpawnpoint = GameObject.Find("_Pizza Spawn Point");
-            money = GameObject.Find("_Dollar");
+            money = GameObject.Find("PizzaDelivery_Dollar");
 
-            text = GameObject.Find("_Score").GetComponent<TMP_Text>();
+            text = GameObject.Find("PizzaDelivery_Score").GetComponent<TMP_Text>();
             text.text = "0";
-            highScore = GameObject.Find("_High Score").GetComponent<TMP_Text>();
+            highScore = GameObject.Find("PizzaDelivery_High Score").GetComponent<TMP_Text>();
             highScore.text = highScoreSave.Value.ToString();
 
-            timeLeftT = GameObject.Find("_Time Left").GetComponent<TMP_Text>();
+            timeLeftT = GameObject.Find("PizzaDelivery_Time Left").GetComponent<TMP_Text>();
 
 
-            music = GameObject.Find("_Music").GetComponent<AudioSource>();
-            pickUp = GameObject.Find("_Pizza Pick Up").GetComponent<AudioSource>();
-            moneyCollect = GameObject.Find("_Ding").GetComponent<AudioSource>();
+            music = GameObject.Find("PizzaDelivery_Music").GetComponent<AudioSource>();
+            pickUp = GameObject.Find("PizzaDelivery_Pizza Pick Up").GetComponent<AudioSource>();
+            moneyCollect = GameObject.Find("PizzaDelivery_Ding").GetComponent<AudioSource>();
             pizzaTime = true;
-            // commmenting so that it seems like i'm doing something when I'm really not.. But at the end of the day it's entertainment if anybody reads this though hopefully not because ta this point it's just a mess of spaghetti code and as I'm writing this I have no idea what I'm doing and even funnier is that the more I write the more the AI tries to tell me that I'm depressed and that my code is disgusting
         }
         void DestroyOven()
         {
@@ -246,14 +242,12 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
         public void OnJoin(string gamemode)
         {
             CreateOven();
-            inRoom = true;
         }
 
         [ModdedGamemodeLeave]
         public void OnLeave(string gamemode)
         {
             DestroyOven();
-            inRoom = false;
         }
     }
 }
