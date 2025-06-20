@@ -2,9 +2,9 @@
 using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
+using TMPro;
 using UnityEngine;
 using Utilla.Attributes;
-using TMPro;
 
 namespace PizzaDelivery
 {
@@ -15,7 +15,7 @@ namespace PizzaDelivery
     {
         enum GameState
         {
-            Nothing, 
+            Nothing,
             LeftPizza,
             RightPizza,
             LeftMoney,
@@ -63,6 +63,17 @@ namespace PizzaDelivery
             highScoreSave = config.Bind("save_data", "high_score", 0);
         }
 
+        Vector3[] SPAWN_POINTS = {new Vector3(-44.84303f, -1.08157f, -68.70835f), new Vector3(-73.60806f, 3.052779f, -60.96426f), new Vector3(-50.44174f, 1.313167f, -59.42339f), new Vector3(-53.38047f, 3.353793f, -33.82049f), new Vector3(-70.27049f, 19.32717f, -63.97144f), new Vector3(-63.28307f, 6.749472f, -62.30716f), new Vector3(-36.90937f, 2.028043f, -38.42205f), new Vector3(-62.41834f, 9.86254f, -45.92508f), new Vector3(-68.8167f, 2.190842f, -48.44229f), new Vector3(-66.87596f, 4.06862f, -35.31256f),
+new Vector3(-77.05774f, 3.768089f, -43.46798f), new Vector3(-41.22551f, 14.3286f, -60.85048f), new Vector3(-46.74791f, 13.36605f, -66.31903f), new Vector3(-35.48535f, 1.961263f, -42.49471f), new Vector3(-45.17835f, 1.913976f, -80.83839f), new Vector3(-51.45393f, 4.551193f, -39.34272f), new Vector3(-41.37206f, 3.129839f, -43.2683f), new Vector3(-47.70633f, 5.120708f, -44.65425f), new Vector3(-48.9511f, 0.04342365f, -73.86208f), new Vector3(-71.71001f, 2.871905f, -72.9758f),
+new Vector3(-45.79899f, 2.911958f, -49.26086f), new Vector3(-56.44239f, 2.529967f, -32.34909f), new Vector3(-70.68591f, 3.23943f, -64.32137f), new Vector3(-52.7088f, 1.403528f, -80.06882f), new Vector3(-58.94591f, 1.560174f, -56.0349f), new Vector3(-63.90379f, 1.630102f, -53.95465f), new Vector3(-49.23327f, -0.008996248f, -73.60466f), new Vector3(-65.26884f, 2.368199f, -48.85759f), new Vector3(-40.87657f, 14.3286f, -62.54209f), new Vector3(-63.99109f, 6.104843f, -59.40333f),
+new Vector3(-76.16725f, 3.731566f, -42.20972f), new Vector3(-69.1464f, 1.792222f, -50.12155f), new Vector3(-39.01917f, 0.5481291f, -62.18946f), new Vector3(-48.22845f, 16.65097f, -66.5891f), new Vector3(-39.99939f, 1.919173f, -76.04157f), new Vector3(-40.08484f, 2.708628f, -46.90683f), new Vector3(-65.83061f, 2.274169f, -71.80022f), new Vector3(-56.55693f, 0.7542297f, -77.96918f), new Vector3(-43.88839f, 13.47987f, -76.11094f), new Vector3(-58.03325f, 1.825384f, -68.19695f),
+new Vector3(-55.95523f, 1.550504f, -62.66128f), new Vector3(-40.38787f, 11.43742f, -46.29952f), new Vector3(-49.31446f, 1.866438f, -54.32156f), new Vector3(-37.39728f, 2.027375f, -55.78165f), new Vector3(-64.4188f, 1.765937f, -52.23244f), new Vector3(-71.005f, 3.940419f, -37.7222f), new Vector3(-61.1524f, 4.167117f, -46.22009f), new Vector3(-78.85857f, 4.192945f, -40.65401f), new Vector3(-68.06644f, 2.691219f, -47.28678f), new Vector3(-82.27378f, 12.00904f, -48.65546f),
+new Vector3(-49.99563f, 12.48417f, -59.28043f), new Vector3(-72.08391f, 2.620946f, -73.90743f), new Vector3(-79.37846f, 1.295618f, -63.82236f), new Vector3(-75.26891f, 18.86437f, -56.0304f), new Vector3(-74.52081f, 1.982882f, -49.5397f), new Vector3(-59.86987f, 16.75887f, -41.91444f), new Vector3(-48.97428f, 3.626517f, -48.16897f), new Vector3(-60.27247f, 1.907948f, -69.31719f), new Vector3(-45.48558f, 0.9733692f, -60.03337f), new Vector3(-38.27936f, 1.537967f, -60.30056f),
+new Vector3(-56.0263f, 0.1304789f, -72.99126f), new Vector3(-72.42519f, 3.412643f, -42.28623f), new Vector3(-79.42206f, 3.124819f, -46.71172f), new Vector3(-47.33434f, 4.066751f, -36.69207f), new Vector3(-51.3093f, 23.89663f, -35.65178f), new Vector3(-50.09941f, 12.75294f, -56.19769f), new Vector3(-44.96401f, 4.41978f, -44.53675f), new Vector3(-80.71365f, 1.03049f, -65.31829f), new Vector3(-60.56686f, 16.83851f, -44.7411f), new Vector3(-48.15392f, 17.18197f, -67.6039f),
+new Vector3(-47.60159f, 5.123402f, -45.01976f), new Vector3(-42.64489f, 2.212496f, -32.37833f), new Vector3(-40.00066f, 2.629277f, -39.92319f), new Vector3(-77.51732f, 2.496627f, -64.76705f), new Vector3(-69.77325f, 3.304725f, -70.0351f), new Vector3(-78.41373f, 2.307069f, -53.57175f), new Vector3(-77.79959f, 2.262066f, -58.80496f), new Vector3(-71.9475f, 3.221176f, -43.35643f), new Vector3(-41.93274f, 1.690007f, -75.97464f), new Vector3(-59.75183f, 2.633665f, -48.98252f),
+new Vector3(-56.81192f, 4.489695f, -37.34747f), new Vector3(-62.62622f, 1.812632f, -67.53043f), new Vector3(-42.86644f, 8.900898f, -47.34394f), new Vector3(-79.6952f, 2.024186f, -76.91071f), new Vector3(-43.09727f, 1.570665f, -76.78428f), new Vector3(-68.22813f, 20.82533f, -60.08047f), new Vector3(-51.88698f, 0.06440711f, -76.21982f), new Vector3(-37.94432f, 2.438039f, -46.63853f), new Vector3(-45.34252f, 4.640601f, -40.66132f), new Vector3(-52.23482f, 11.93009f, -68.31999f),
+new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f, -54.51466f), new Vector3(-65.97805f, 4.075094f, -45.04754f)};
+
         void LateUpdate()
         {
             if (pizzaTime)
@@ -78,8 +89,6 @@ namespace PizzaDelivery
                         holdState = GameState.Nothing;
                         pizza.transform.position = pizzaSpawnpoint.transform.position;
                         clientHouse.transform.position = new Vector3(0, -1000, 0);
-                        GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
-                        GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
 
                         if (deliveriesMade > highScoreSave.Value)
                         {
@@ -98,7 +107,7 @@ namespace PizzaDelivery
                 {
                     HoldingPizza(holdState == GameState.RightPizza);
                     pizza.transform.position = holdState == GameState.RightPizza ? GorillaTagger.Instance.rightHandTransform.position : GorillaTagger.Instance.leftHandTransform.position;
-                    pizza.transform.rotation = holdState == GameState.RightPizza ? GorillaTagger.Instance.rightHandTransform.rotation :GorillaTagger.Instance.leftHandTransform.rotation;
+                    pizza.transform.rotation = holdState == GameState.RightPizza ? GorillaTagger.Instance.rightHandTransform.rotation : GorillaTagger.Instance.leftHandTransform.rotation;
                 }
                 if (holdState == GameState.LeftMoney || holdState == GameState.RightMoney)
                 {
@@ -117,7 +126,6 @@ namespace PizzaDelivery
                 DropNewClient();
                 pickUp.Play();
 
-                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
 
                 if (!inRound)
                 {
@@ -132,7 +140,7 @@ namespace PizzaDelivery
                 DropNewClient();
                 pickUp.Play();
 
-                GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
+
 
                 if (!inRound)
                 {
@@ -142,7 +150,7 @@ namespace PizzaDelivery
                 }
             }
 
-            pizza.transform.position = pizzaSpawnpoint.transform.position; 
+            pizza.transform.position = pizzaSpawnpoint.transform.position;
             pizza.transform.rotation = pizzaSpawnpoint.transform.rotation;
             money.transform.position = new Vector3(0, -500, 0);
         }
@@ -153,7 +161,6 @@ namespace PizzaDelivery
             {
                 holdState = isRight ? GameState.RightMoney : GameState.LeftMoney;
 
-                GorillaTagger.Instance.StartVibration(!isRight, 0.5f, 0.1f);
                 pickUp.Play();
             }
 
@@ -167,7 +174,6 @@ namespace PizzaDelivery
                 holdState = GameState.Nothing;
                 deliveriesMade++;
                 text.text = deliveriesMade.ToString();
-                GorillaTagger.Instance.StartVibration(!isRight, 0.5f, 0.1f);
                 moneyCollect.Play();
             }
             pizza.transform.position = pizzaSpawnpoint.transform.position;
@@ -175,20 +181,8 @@ namespace PizzaDelivery
         }
 
         void DropNewClient()
-        {
-            Debug.Log("ok");
-            for (int i = 0; i < 50000; i++) // Nothing could go wrong here
-            {
-                RaycastHit rayHit;
-                if (Physics.Raycast(new Vector3(UnityEngine.Random.Range(min.x, max.x), max.y, UnityEngine.Random.Range(min.z, max.z)), Vector3.down, out rayHit, 40))
-                {
-                    if (Vector3.Dot(rayHit.normal, Vector3.up) > 0.5f && rayHit.point.y > min.y)
-                    {
-                        clientHouse.transform.position = rayHit.point;
-                        return;
-                    }
-                }
-            }
+        { // Code here used to be more fun, but more broken aswell. This is less broken but less fun.
+            clientHouse.transform.position = SPAWN_POINTS[Random.Range(0, SPAWN_POINTS.Length)];
         }
 
         void CreateOven()
@@ -200,7 +194,7 @@ namespace PizzaDelivery
                 ovenPrefab = ovenAssetBundle.LoadAsset<GameObject>("PizzaOven");
             }
 
-            ovenProps = Instantiate(ovenPrefab, new Vector3(-27.99f, 2.19f, -47.52f), Quaternion.identity); 
+            ovenProps = Instantiate(ovenPrefab, new Vector3(-27.99f, 2.19f, -47.52f), Quaternion.identity);
             ovenProps.AddComponent<GorillaSurfaceOverride>();
 
             clientHouse = GameObject.Find("_House");
