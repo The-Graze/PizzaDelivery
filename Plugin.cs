@@ -89,6 +89,8 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
                         holdState = GameState.Nothing;
                         pizza.transform.position = pizzaSpawnpoint.transform.position;
                         clientHouse.transform.position = new Vector3(0, -1000, 0);
+                        GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
+                        GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
 
                         if (deliveriesMade > highScoreSave.Value)
                         {
@@ -126,6 +128,7 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
                 DropNewClient();
                 pickUp.Play();
 
+                GorillaTagger.Instance.StartVibration(true, 0.5f, 0.1f);
 
                 if (!inRound)
                 {
@@ -140,7 +143,7 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
                 DropNewClient();
                 pickUp.Play();
 
-
+                GorillaTagger.Instance.StartVibration(false, 0.5f, 0.1f);
 
                 if (!inRound)
                 {
@@ -161,6 +164,7 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
             {
                 holdState = isRight ? GameState.RightMoney : GameState.LeftMoney;
 
+                GorillaTagger.Instance.StartVibration(!isRight, 0.5f, 0.1f);
                 pickUp.Play();
             }
 
@@ -174,6 +178,7 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
                 holdState = GameState.Nothing;
                 deliveriesMade++;
                 text.text = deliveriesMade.ToString();
+                GorillaTagger.Instance.StartVibration(!isRight, 0.5f, 0.1f);
                 moneyCollect.Play();
             }
             pizza.transform.position = pizzaSpawnpoint.transform.position;
@@ -181,7 +186,7 @@ new Vector3(-37.70502f, 2.184099f, -50.7174f), new Vector3(-40.67677f, 1.879364f
         }
 
         void DropNewClient()
-        { // Code here used to be more fun, but more broken aswell. This is less broken but less fun.
+        {
             clientHouse.transform.position = SPAWN_POINTS[Random.Range(0, SPAWN_POINTS.Length)];
         }
 
